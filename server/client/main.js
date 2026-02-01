@@ -30,6 +30,34 @@ let ws = null;
 let availableCharacters = {};
 let selectedCharacterId = null;
 
+function setActionControl(el, emoji, label, disabled) {
+  if (!el) return;
+  // if element contains emoji/label children (card), update them
+  const emojiEl = el.querySelector && el.querySelector('.actionEmoji');
+  const labelEl = el.querySelector && el.querySelector('.actionLabel');
+  if (emojiEl) emojiEl.textContent = emoji || '';
+  if (labelEl) labelEl.textContent = label || '';
+  if (!emojiEl && !labelEl) {
+    el.textContent = `${emoji ? emoji + ' ' : ''}${label || ''}`.trim();
+  }
+  // apply disabled state in an accessible way
+  if (disabled) {
+    if (el.tagName === 'BUTTON') el.disabled = true;
+    else {
+      el.setAttribute('aria-disabled', 'true');
+      el.tabIndex = -1;
+    }
+    el.classList && el.classList.add && el.classList.add('disabled');
+  } else {
+    if (el.tagName === 'BUTTON') el.disabled = false;
+    else {
+      el.setAttribute('aria-disabled', 'false');
+      if (el.getAttribute('tabindex') === '-1') el.tabIndex = 0;
+    }
+    el.classList && el.classList.remove && el.classList.remove('disabled');
+  }
+}
+
 function updateCharacterCard(c){
   if (!c) return;
   if (charCardTitleEl) charCardTitleEl.textContent = (c.emoji ? c.emoji + ' ' : '') + 'Character - ' + (c.type || c.name || c.id || '-');
@@ -42,6 +70,24 @@ function updateCharacterCard(c){
     if (hpBar) { hpBar.max = hp; /* set current to full on preview */ hpBar.value = hp; }
     if (hpText) hpText.textContent = `${hp}/${hp}`;
   }
+  // update special control label from character definition if available
+  if (specialBtn) {
+    const s = c.special || {};
+    const name = s.name || 'Special';
+    const emoji = s.emoji || '✨';
+    setActionControl(specialBtn, emoji, `${name}`, false);
+  }
+  // update damage/cost previews for attack and special
+  const attackDamageEl = document.getElementById('attackDamage');
+  const attackCostEl = document.getElementById('attackCost');
+  const specialDamageEl = document.getElementById('specialDamage');
+  const specialCostEl = document.getElementById('specialCost');
+  const baseAtk = c.attack ?? c.attack_power ?? null;
+  if (attackDamageEl) attackDamageEl.textContent = baseAtk !== null ? String(baseAtk) : '-';
+  if (attackCostEl) attackCostEl.textContent = String(ATTACK_COST);
+  const specialMult = (c.special && (c.special.damage_mult || c.special.damage_mult === 0)) ? c.special.damage_mult : (c.special_damage_mult || 1.5);
+  if (specialDamageEl) specialDamageEl.textContent = baseAtk !== null ? String(Math.round(baseAtk * specialMult)) : '-';
+  if (specialCostEl) specialCostEl.textContent = String(SPECIAL_COST);
 }
 
 function addMsg(t){
@@ -108,12 +154,25 @@ function connect() {
         if (statRangeEl) statRangeEl.textContent = (merged.attack_range ?? merged.range) ?? '-';
         if (statSpeedEl) statSpeedEl.textContent = (merged.speed) ?? '-';
         if (attackBtn) {
-          attackBtn.textContent = `Attack (-${ATTACK_COST} moves)`;
-          attackBtn.disabled = mp < ATTACK_COST;
+          setActionControl(attackBtn, '🎯', `Attack`, mp < ATTACK_COST);
+          const atkVal = (merged.attack ?? merged.attack_power) ?? null;
+          const atkDmgEl = document.getElementById('attackDamage');
+          const atkCostEl = document.getElementById('attackCost');
+          if (atkDmgEl) atkDmgEl.textContent = atkVal !== null ? String(atkVal) : '-';
+          if (atkCostEl) atkCostEl.textContent = String(ATTACK_COST);
         }
         if (specialBtn) {
-          specialBtn.textContent = `Special (-${SPECIAL_COST} moves)`;
-          specialBtn.disabled = mp < SPECIAL_COST;
+          const preview = selectedCharacterId ? availableCharacters[selectedCharacterId] : null;
+          const s = (preview && preview.special) ? preview.special : null;
+          const name = s && s.name ? s.name : 'Special';
+          const emoji = s && s.emoji ? s.emoji : '✨';
+          setActionControl(specialBtn, emoji, `${name}`, mp < SPECIAL_COST);
+          const baseAtk = (merged.attack ?? merged.attack_power) ?? null;
+          const specialDmgEl = document.getElementById('specialDamage');
+          const specialCostEl = document.getElementById('specialCost');
+          const mult = (s && (s.damage_mult || s.damage_mult === 0)) ? s.damage_mult : (merged.special_damage_mult || 1.5);
+          if (specialDmgEl) specialDmgEl.textContent = baseAtk !== null ? String(Math.round(baseAtk * mult)) : '-';
+          if (specialCostEl) specialCostEl.textContent = String(SPECIAL_COST);
         }
         if (hp <= 0 && !window._deathShown) {
           window._deathShown = true;
@@ -194,10 +253,10 @@ async function loadCharacters() {
     if (first) { first.checked = true; first.closest('.charCard').classList.add('selected'); updateCharacterCard(availableCharacters[first.value]); }
   } catch (e) {
     const defaults = [
-      {id:'wizard',type:'Wizard',emoji:'🧙',health:50,attack_range:3,speed:2},
-      {id:'elf',type:'Elf',emoji:'🧝',health:60,attack_range:2,speed:3},
-      {id:'barbarian',type:'Barbarian',emoji:'🪓',health:100,attack_range:1,speed:1},
-      {id:'snowbeast',type:'Snow Beast',emoji:'🐺',health:120,attack_range:2,speed:1},
+      {id:'wizard',type:'Wizard',emoji:'🧙',health:50,attack_range:3,speed:2,special:{name:'Thunder Clap',emoji:'⚡'}},
+      {id:'elf',type:'Elf',emoji:'🧝',health:60,attack_range:2,speed:3,special:{name:'Flaming Arrows',emoji:'🔥'}},
+      {id:'barbarian',type:'Barbarian',emoji:'🪓',health:100,attack_range:1,speed:1,special:{name:'Berserker Slam',emoji:'💥'}},
+      {id:'snowbeast',type:'Snow Beast',emoji:'🐺',health:120,attack_range:2,speed:1,special:{name:'Frost Bite',emoji:'❄️'}},
       ];
     defaults.forEach(c => {
       const card = document.createElement('label');
@@ -307,11 +366,15 @@ if (quitBtn) {
 
 attackBtn.addEventListener('click', () => {
   if (!ws || ws.readyState !== WebSocket.OPEN) return addMsg('Not connected');
+  if (attackBtn.classList && attackBtn.classList.contains && attackBtn.classList.contains('disabled')) return addMsg('Not enough moves');
+  if (attackBtn.getAttribute && attackBtn.getAttribute('aria-disabled') === 'true') return addMsg('Not enough moves');
   ws.send('attack');
 });
 
 specialBtn.addEventListener('click', () => {
   if (!ws || ws.readyState !== WebSocket.OPEN) return addMsg('Not connected');
+  if (specialBtn.classList && specialBtn.classList.contains && specialBtn.classList.contains('disabled')) return addMsg('Not enough moves');
+  if (specialBtn.getAttribute && specialBtn.getAttribute('aria-disabled') === 'true') return addMsg('Not enough moves');
   ws.send('attack special');
 });
 
@@ -341,6 +404,9 @@ document.addEventListener('keydown', (e) => {
 document.addEventListener('keydown', (e) => {
   if (e.code === 'Space') {
     if (!ws || ws.readyState !== WebSocket.OPEN) return addMsg('Not connected');
+    // don't attack if not enough move points
+    const mp = parseInt(movesEl ? movesEl.textContent : '0', 10) || 0;
+    if (mp < ATTACK_COST) return addMsg('Not enough moves');
     e.preventDefault();
     ws.send('attack');
   }
@@ -351,6 +417,8 @@ document.addEventListener('keydown', (e) => {
   if (e.code === 'KeyS') {
     if (document.activeElement && document.activeElement.tagName === 'INPUT') return;
     if (!ws || ws.readyState !== WebSocket.OPEN) return addMsg('Not connected');
+    const mp = parseInt(movesEl ? movesEl.textContent : '0', 10) || 0;
+    if (mp < SPECIAL_COST) return addMsg('Not enough moves');
     e.preventDefault();
     ws.send('attack special');
   }

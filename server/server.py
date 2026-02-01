@@ -35,11 +35,11 @@ WORLD_WIDTH = 100
 WORLD_HEIGHT = 30
 
 CHARACTER_DEFS = {
-    "wizard": {"id": "wizard", "type": "Wizard", "emoji": "🧙", "health": 50, "attack_range": 3, "attack": 12, "speed": 2, "special": {"damage_mult": 2.0, "move_cost_mult": 2}},
-    "elf": {"id": "elf", "type": "Elf", "emoji": "🧝", "health": 60, "attack_range": 2, "attack": 9, "speed": 3, "special": {"damage_mult": 1.75, "move_cost_mult": 2}},
-    "barbarian": {"id": "barbarian", "type": "Barbarian", "emoji": "🪓", "health": 100, "attack_range": 1, "attack": 18, "speed": 1, "special": {"damage_mult": 2.0, "move_cost_mult": 2}},
-    "snowbeast": {"id": "snowbeast", "type": "Snow Beast", "emoji": "🐺", "health": 120, "attack_range": 2, "attack": 15, "speed": 1, "special": {"damage_mult": 1.8, "move_cost_mult": 2}},
-    "archer": {"id": "archer", "type": "Archer", "emoji": "🏹", "health": 40, "attack_range": 4, "attack": 7, "speed": 3, "special": {"damage_mult": 1.5, "move_cost_mult": 2}},
+    "wizard": {"id": "wizard", "type": "Wizard", "emoji": "🧙", "health": 50, "attack_range": 3, "attack": 12, "speed": 2, "special": {"name": "Thunder Clap", "emoji": "⚡", "damage_mult": 2.0, "move_cost_mult": 2}},
+    "elf": {"id": "elf", "type": "Elf", "emoji": "🧝", "health": 60, "attack_range": 2, "attack": 9, "speed": 3, "special": {"name": "Flaming Arrows", "emoji": "🔥", "damage_mult": 1.75, "move_cost_mult": 2}},
+    "barbarian": {"id": "barbarian", "type": "Barbarian", "emoji": "🪓", "health": 100, "attack_range": 1, "attack": 18, "speed": 1, "special": {"name": "Berserker Slam", "emoji": "💥", "damage_mult": 2.0, "move_cost_mult": 2}},
+    "snowbeast": {"id": "snowbeast", "type": "Snow Beast", "emoji": "🐺", "health": 120, "attack_range": 2, "attack": 15, "speed": 1, "special": {"name": "Frost Bite", "emoji": "❄️", "damage_mult": 1.8, "move_cost_mult": 2}},
+    "archer": {"id": "archer", "type": "Archer", "emoji": "🏹", "health": 40, "attack_range": 4, "attack": 7, "speed": 3, "special": {"name": "Flaming Arrows", "emoji": "🏹", "damage_mult": 1.5, "move_cost_mult": 2}},
 }
 
 ITEM_DEFS = {
