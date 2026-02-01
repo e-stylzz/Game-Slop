@@ -41,6 +41,11 @@ const specialAudio = new Audio('/static/audio/explosion.mp3');
 specialAudio.preload = 'auto';
 specialAudio.addEventListener('error', () => { console.warn('Failed to load special audio'); });
 
+// death scream audio
+const screamAudio = new Audio('/static/audio/scream.mp3');
+screamAudio.preload = 'auto';
+screamAudio.addEventListener('error', () => { console.warn('Failed to load scream audio'); });
+
 function setActionControl(el, emoji, label, disabled) {
   if (!el) return;
   // if element contains emoji/label children (card), update them
@@ -189,8 +194,29 @@ function connect() {
         }
         if (hp <= 0 && !window._deathShown) {
           window._deathShown = true;
-          alert('You died');
-          if (ws) ws.close();
+          try {
+            screamAudio.currentTime = 0;
+            const p = screamAudio.play();
+            if (p && p.then) {
+              let alerted = false;
+              const showAlert = () => {
+                if (alerted) return; alerted = true;
+                if (ws) ws.close();
+                alert('You died');
+              };
+              const onEnded = () => { showAlert(); screamAudio.removeEventListener('ended', onEnded); };
+              screamAudio.addEventListener('ended', onEnded);
+              // fallback in case playback doesn't start or 'ended' doesn't fire
+              const t = setTimeout(() => { showAlert(); screamAudio.removeEventListener('ended', onEnded); }, 5000);
+              p.then(() => { /* playback started */ }).catch(() => { clearTimeout(t); showAlert(); });
+            } else {
+              alert('You died');
+              if (ws) ws.close();
+            }
+          } catch (e) {
+            alert('You died');
+            if (ws) ws.close();
+          }
         }
       } else if (data.type === 'turn') {
         // show whose turn it is and render upcoming queue
