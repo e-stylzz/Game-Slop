@@ -26,6 +26,16 @@
     .charAttrs{font-size:13px;color:#333;line-height:1.4}
     .charAttrs div{margin-bottom:6px}
     .quitBtn{position:fixed;top:12px;right:12px;padding:6px 10px;border-radius:6px;border:1px solid #ccc;background:#fff;cursor:pointer;z-index:50}
+    /* top bar layout: title, turnInfo, quit */
+    .topBar{display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .topBar h2{margin:0}
+    .topBar .quitBtn{position:static}
+
+    /* turnInfo inside #game: fixed center top and horizontal layout */
+    #turnInfo{position:fixed;left:50%;transform:translateX(-50%);top:12px;display:flex;align-items:center;gap:16px;padding:6px 10px;border-radius:6px;background:rgba(255,255,255,0.02)}
+    #turnInfo .current,#turnInfo .upcoming{display:flex;align-items:center;gap:8px}
+    #turnQueue{display:flex;gap:8px;list-style:none;padding:0;margin:0}
+    #turnQueue li{background:#fff;color:#000;padding:2px 6px;border-radius:4px}
     .itemList{display:flex;flex-direction:column;gap:8px}
     .itemCard{border:1px solid #ccc;padding:8px;border-radius:6px;cursor:pointer;background:#fff}
     .itemCard:hover{background:#f7f7ff}
@@ -41,8 +51,10 @@
   </style>
 </head>
 <body>
-  <h2>ASCII Game (Client)</h2>
-  <button id="quit" class="quitBtn">Quit</button>
+  <div class="topBar">
+    <h2>ASCII Game (Client)</h2>
+    <button id="quit" class="quitBtn">Quit</button>
+  </div>
   <div id="lobby">
     <div class="lobbyInner">
       
@@ -59,6 +71,12 @@
   </div>
 
   <div id="game" style="display:none">
+    <div id="turnInfo">
+      <div class="current"><strong>Active:</strong> <span id="currentPlayer">-</span></div>
+      <div class="upcoming"><strong>Next:</strong>
+        <ol id="turnQueue" style="margin:0;padding:0;display:flex;gap:6px"></ol>
+      </div>
+    </div>
     <pre id="map">(no map)</pre>
     
     <!-- top cards removed; character and actions moved into left column below -->
@@ -72,7 +90,7 @@
               <span id="hpText">0/0</span>
             </div>
           <div class="charInfo">
-            <div><strong id="charName">-</strong></div>
+            <!-- <div><strong id="charName">-</strong></div> -->
             <div class="statList">
               <div>Attack: <span id="statAttack">-</span></div>
               <div>Range: <span id="statRange">-</span></div>
@@ -82,6 +100,9 @@
           </div>
         </div>
 
+      </div>
+
+      <div class="panel" id="panel2">
         <div class="card actionsCard">
           <div class="cardTitle">Actions</div>
           <div class="actionButtons">
@@ -94,15 +115,6 @@
             <strong>Moves</strong>: <span id="moves">0</span>
           </div>
           <div id="items" style="display:none; margin-top:8px"></div>
-        </div>
-      </div>
-
-      <div class="panel" id="panel2">
-        <div id="turnInfo">
-          <strong>Current:</strong> <span id="currentPlayer">-</span>
-          <div><strong>Upcoming:</strong>
-            <ol id="turnQueue" style="margin-top:4px"></ol>
-          </div>
         </div>
       </div>
 
