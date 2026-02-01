@@ -29,6 +29,7 @@ const charCardTitleEl = document.getElementById('charCardTitle');
 let ws = null;
 let availableCharacters = {};
 let selectedCharacterId = null;
+let lastHasTarget = false;
 
 // audio assets
 const attackAudio = new Audio('/static/audio/attack.mp3');
@@ -159,12 +160,14 @@ function connect() {
         // merge server status with selected character preview so card remains consistent
         const preview = selectedCharacterId ? availableCharacters[selectedCharacterId] : null;
         const merged = Object.assign({}, preview || {}, data || {});
+        // store authoritative nearby-target info from server
+        lastHasTarget = !!merged.has_target;
         if (charNameEl) charNameEl.textContent = (merged.emoji ? merged.emoji + ' ' : '') + (merged.player_name || merged.name || merged.type || merged.id || '-');
         if (statAttackEl) statAttackEl.textContent = (merged.attack ?? merged.attack_power) ?? '-';
         if (statRangeEl) statRangeEl.textContent = (merged.attack_range ?? merged.range) ?? '-';
         if (statSpeedEl) statSpeedEl.textContent = (merged.speed) ?? '-';
         if (attackBtn) {
-          setActionControl(attackBtn, '🎯', `Attack`, mp < ATTACK_COST);
+          setActionControl(attackBtn, '🎯', `Attack`, (mp < ATTACK_COST) || !lastHasTarget);
           const atkVal = (merged.attack ?? merged.attack_power) ?? null;
           const atkDmgEl = document.getElementById('attackDamage');
           const atkCostEl = document.getElementById('attackCost');
@@ -176,7 +179,7 @@ function connect() {
           const s = (preview && preview.special) ? preview.special : null;
           const name = s && s.name ? s.name : 'Special';
           const emoji = s && s.emoji ? s.emoji : '✨';
-          setActionControl(specialBtn, emoji, `${name}`, mp < SPECIAL_COST);
+          setActionControl(specialBtn, emoji, `${name}`, (mp < SPECIAL_COST) || !lastHasTarget);
           const baseAtk = (merged.attack ?? merged.attack_power) ?? null;
           const specialDmgEl = document.getElementById('specialDamage');
           const specialCostEl = document.getElementById('specialCost');
@@ -419,6 +422,7 @@ document.addEventListener('keydown', (e) => {
     // don't attack if not enough move points
     const mp = parseInt(movesEl ? movesEl.textContent : '0', 10) || 0;
     if (mp < ATTACK_COST) return addMsg('Not enough moves');
+    if (!lastHasTarget) return addMsg('No targets in range');
     e.preventDefault();
     try { attackAudio.currentTime = 0; attackAudio.play().catch(() => {}); } catch (e) {}
     ws.send('attack');
@@ -432,6 +436,7 @@ document.addEventListener('keydown', (e) => {
     if (!ws || ws.readyState !== WebSocket.OPEN) return addMsg('Not connected');
     const mp = parseInt(movesEl ? movesEl.textContent : '0', 10) || 0;
     if (mp < SPECIAL_COST) return addMsg('Not enough moves');
+    if (!lastHasTarget) return addMsg('No targets in range');
     e.preventDefault();
     try { specialAudio.currentTime = 0; specialAudio.play().catch(() => {}); } catch (e) {}
     ws.send('attack special');

@@ -31,8 +31,8 @@ async def root_index():
     if index_file.exists():
         return FileResponse(str(index_file))
     return {"msg": "No client UI found"}
-WORLD_WIDTH = 125
-WORLD_HEIGHT = 20
+WORLD_WIDTH = 10 #125
+WORLD_HEIGHT = 10 #20
 
 CHARACTER_DEFS = {
     "wizard": {"id": "wizard", "type": "Wizard", "emoji": "🧙", "health": 50, "attack_range": 3, "attack": 12, "speed": 2, "special": {"name": "Thunder Clap", "emoji": "⚡", "damage_mult": 2.0, "move_cost_mult": 2}},
@@ -118,11 +118,22 @@ async def broadcast_map():
 
 async def send_status(player: Player):
     try:
+        # determine whether any other player is within this player's attack range
+        has_target = False
+        for p in players.values():
+            if p.id == player.id:
+                continue
+            dist = abs(p.x - player.x) + abs(p.y - player.y)
+            if dist <= getattr(player, 'attack_range', 0):
+                has_target = True
+                break
+
         await player.ws.send_json({
             "type": "status",
             "hp": max(0, player.health),
             "max_hp": player.max_health,
             "move_points": player.move_points,
+            "has_target": has_target,
         })
     except Exception:
         pass
