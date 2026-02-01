@@ -43,8 +43,8 @@ CHARACTER_DEFS = {
 }
 
 ITEM_DEFS = {
-    "berry": {"id": "berry", "name": "Berry", "restore": 10, "move_cost": 3},
-    "medkit": {"id": "medkit", "name": "Med Kit", "restore": 30, "move_cost": 6},
+    "berry": {"id": "berry", "name": "Berry", "emoji": "🍓", "restore": 10, "move_cost": 3},
+    "medkit": {"id": "medkit", "name": "Med Kit", "emoji": "✚", "restore": 30, "move_cost": 6},
 }
 
 

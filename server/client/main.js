@@ -317,9 +317,10 @@ async function loadItems() {
     itemsContainer.innerHTML = '';
     itemsContainer.classList.add('itemList');
     items.forEach(it => {
-      const card = document.createElement('label');
-      card.className = 'itemCard';
-      card.innerHTML = `\n        <div class="itemTitle">${it.name}</div>\n        <div class="itemAttrs">Moves: ${it.move_cost}</div>`;
+      const card = document.createElement('div');
+      card.className = 'actionCard itemCard';
+      card.tabIndex = 0;
+      card.innerHTML = `\n        <div class="actionEmoji">${it.emoji ?? ''}</div>\n        <div style="display:flex;flex-direction:column;align-items:flex-start;">\n          <div class="actionLabel">${it.name}</div>\n          <div class="actionStats">\n            <div class="stat">Moves: <span class="itemMoveCost">${it.move_cost}</span></div>\n            <div class="stat">Restores: <span class="itemRestore">${it.restore ?? '-'}</span> HP</div>\n          </div>\n        </div>`;
       card.addEventListener('click', () => {
         if (!ws || ws.readyState !== WebSocket.OPEN) return addMsg('Not connected');
         ws.send('use ' + it.id);
@@ -331,13 +332,14 @@ async function loadItems() {
     itemsContainer.innerHTML = '';
     itemsContainer.classList.add('itemList');
     const fallback = [
-      {id:'berry',name:'Berry',move_cost:3},
-      {id:'medkit',name:'Med Kit',move_cost:6},
+      {id:'berry',name:'Berry',emoji:'🍓',move_cost:3,restore:10},
+      {id:'medkit',name:'Med Kit',emoji:'✚',move_cost:6,restore:30},
     ];
     fallback.forEach(it=>{
-      const card = document.createElement('label');
-      card.className = 'itemCard';
-      card.innerHTML = `\n        <div class="itemTitle">${it.name}</div>\n        <div class="itemAttrs">Moves: ${it.move_cost}</div>`;
+      const card = document.createElement('div');
+      card.className = 'actionCard itemCard';
+      card.tabIndex = 0;
+      card.innerHTML = `\n        <div class="actionEmoji">${it.emoji ?? ''}</div>\n        <div style="display:flex;flex-direction:column;align-items:flex-start;">\n          <div class="actionLabel">${it.name}</div>\n          <div class="actionStats">\n            <div class="stat">Moves: <span class="itemMoveCost">${it.move_cost}</span></div>\n            <div class="stat">Restores: <span class="itemRestore">${it.restore ?? '-'} </span>HP</div>\n          </div>\n        </div>`;
       card.addEventListener('click', ()=>{ if (!ws || ws.readyState !== WebSocket.OPEN) return addMsg('Not connected'); ws.send('use ' + it.id); });
       itemsContainer.appendChild(card);
     });
