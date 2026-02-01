@@ -32,7 +32,7 @@ let selectedCharacterId = null;
 
 function updateCharacterCard(c){
   if (!c) return;
-  if (charCardTitleEl) charCardTitleEl.textContent = 'Character - ' + (c.type || c.name || c.id || '-');
+  if (charCardTitleEl) charCardTitleEl.textContent = (c.emoji ? c.emoji + ' ' : '') + 'Character - ' + (c.type || c.name || c.id || '-');
   if (charNameEl) charNameEl.textContent = c.type || c.name || c.id || '-';
   if (statAttackEl) statAttackEl.textContent = (c.attack ?? c.attack_power) ?? '-';
   if (statRangeEl) statRangeEl.textContent = (c.attack_range ?? c.range) ?? '-';
@@ -79,7 +79,20 @@ function connect() {
     try {
       const data = JSON.parse(ev.data);
       if (data.type === 'map') {
-        mapEl.textContent = data.map;
+        // render map as tiles so we can highlight the player's own tile
+        const rows = (data.map || '').split('\n');
+        const you = data.you || null;
+        let html = '';
+        rows.forEach((row, r) => {
+          // iterate by codepoints to keep emoji intact
+          const chars = Array.from(row);
+          chars.forEach((ch, c) => {
+            const isYou = you && you.x === c && you.y === r;
+            html += `<span class="tile${isYou ? ' you' : ''}">${ch || ' '}</span>`;
+          });
+          html += '\n';
+        });
+        mapEl.innerHTML = html;
       } else if (data.type === 'status') {
         const hp = Math.max(0, data.hp || 0);
         const max_hp = data.max_hp || 1;
@@ -90,7 +103,7 @@ function connect() {
         // merge server status with selected character preview so card remains consistent
         const preview = selectedCharacterId ? availableCharacters[selectedCharacterId] : null;
         const merged = Object.assign({}, preview || {}, data || {});
-        if (charNameEl) charNameEl.textContent = merged.player_name || merged.name || merged.type || merged.id || '-';
+        if (charNameEl) charNameEl.textContent = (merged.emoji ? merged.emoji + ' ' : '') + (merged.player_name || merged.name || merged.type || merged.id || '-');
         if (statAttackEl) statAttackEl.textContent = (merged.attack ?? merged.attack_power) ?? '-';
         if (statRangeEl) statRangeEl.textContent = (merged.attack_range ?? merged.range) ?? '-';
         if (statSpeedEl) statSpeedEl.textContent = (merged.speed) ?? '-';
@@ -164,7 +177,7 @@ async function loadCharacters() {
       const card = document.createElement('label');
       card.className = 'charCard';
       card.tabIndex = 0;
-      card.innerHTML = `\n        <input type="radio" name="character" value="${c.id}" style="display:none">\n        <div class="charTitle">${c.type}</div>\n        <div class="charAttrs">\n          <div>HP: ${c.health}</div>\n          <div>Attack: ${c.attack ?? '-'}</div>\n          <div>Range: ${c.attack_range ?? '-'}</div>\n          <div>Speed: ${c.speed ?? '-'}</div>\n        </div>`;
+      card.innerHTML = `\n        <input type="radio" name="character" value="${c.id}" style="display:none">\n        <div class="charTitle">${c.type}</div>\n        <div class="charEmoji">${c.emoji ?? ''}</div>\n        <div class="charAttrs">\n          <div>HP: ${c.health}</div>\n          <div>Attack: ${c.attack ?? '-'}</div>\n          <div>Range: ${c.attack_range ?? '-'}</div>\n          <div>Speed: ${c.speed ?? '-'}</div>\n        </div>`;
       const radio = card.querySelector('input[name="character"]');
       // save character for preview updates
       availableCharacters[c.id] = c;
@@ -181,15 +194,15 @@ async function loadCharacters() {
     if (first) { first.checked = true; first.closest('.charCard').classList.add('selected'); updateCharacterCard(availableCharacters[first.value]); }
   } catch (e) {
     const defaults = [
-      {id:'wizard',type:'Wizard',health:50,attack_range:3,speed:2},
-      {id:'elf',type:'Elf',health:60,attack_range:2,speed:3},
-      {id:'barbarian',type:'Barbarian',health:100,attack_range:1,speed:1},
-      {id:'snowbeast',type:'Snow Beast',health:120,attack_range:2,speed:1},
-    ];
+      {id:'wizard',type:'Wizard',emoji:'🧙',health:50,attack_range:3,speed:2},
+      {id:'elf',type:'Elf',emoji:'🧝',health:60,attack_range:2,speed:3},
+      {id:'barbarian',type:'Barbarian',emoji:'🪓',health:100,attack_range:1,speed:1},
+      {id:'snowbeast',type:'Snow Beast',emoji:'🐺',health:120,attack_range:2,speed:1},
+      ];
     defaults.forEach(c => {
       const card = document.createElement('label');
       card.className = 'charCard';
-      card.innerHTML = `\n        <input type="radio" name="character" value="${c.id}" style="display:none">\n        <div class="charTitle">${c.type}</div>\n        <div class="charAttrs">\n          <div>HP: ${c.health}</div>\n          <div>Attack: ${c.attack ?? '-'}</div>\n          <div>Range: ${c.attack_range ?? '-'}</div>\n          <div>Speed: ${c.speed ?? '-'}</div>\n        </div>`;
+      card.innerHTML = `\n        <input type="radio" name="character" value="${c.id}" style="display:none">\n        <div class="charTitle">${c.type}</div>\n        <div class="charEmoji">${c.emoji ?? ''}</div>\n        <div class="charAttrs">\n          <div>HP: ${c.health}</div>\n          <div>Attack: ${c.attack ?? '-'}</div>\n          <div>Range: ${c.attack_range ?? '-'}</div>\n          <div>Speed: ${c.speed ?? '-'}</div>\n        </div>`;
       const radio = card.querySelector('input[name="character"]');
       availableCharacters[c.id] = c;
       card.addEventListener('click', () => {

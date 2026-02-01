@@ -35,11 +35,11 @@ WORLD_WIDTH = 100
 WORLD_HEIGHT = 30
 
 CHARACTER_DEFS = {
-    "wizard": {"id": "wizard", "type": "Wizard", "health": 50, "attack_range": 3, "attack": 12, "speed": 2, "special": {"damage_mult": 2.0, "move_cost_mult": 2}},
-    "elf": {"id": "elf", "type": "Elf", "health": 60, "attack_range": 2, "attack": 9, "speed": 3, "special": {"damage_mult": 1.75, "move_cost_mult": 2}},
-    "barbarian": {"id": "barbarian", "type": "Barbarian", "health": 100, "attack_range": 1, "attack": 18, "speed": 1, "special": {"damage_mult": 2.0, "move_cost_mult": 2}},
-    "snowbeast": {"id": "snowbeast", "type": "Snow Beast", "health": 120, "attack_range": 2, "attack": 15, "speed": 1, "special": {"damage_mult": 1.8, "move_cost_mult": 2}},
-    "archer": {"id": "archer", "type": "Archer", "health": 40, "attack_range": 4, "attack": 7, "speed": 3, "special": {"damage_mult": 1.5, "move_cost_mult": 2}},
+    "wizard": {"id": "wizard", "type": "Wizard", "emoji": "🧙", "health": 50, "attack_range": 3, "attack": 12, "speed": 2, "special": {"damage_mult": 2.0, "move_cost_mult": 2}},
+    "elf": {"id": "elf", "type": "Elf", "emoji": "🧝", "health": 60, "attack_range": 2, "attack": 9, "speed": 3, "special": {"damage_mult": 1.75, "move_cost_mult": 2}},
+    "barbarian": {"id": "barbarian", "type": "Barbarian", "emoji": "🪓", "health": 100, "attack_range": 1, "attack": 18, "speed": 1, "special": {"damage_mult": 2.0, "move_cost_mult": 2}},
+    "snowbeast": {"id": "snowbeast", "type": "Snow Beast", "emoji": "🐺", "health": 120, "attack_range": 2, "attack": 15, "speed": 1, "special": {"damage_mult": 1.8, "move_cost_mult": 2}},
+    "archer": {"id": "archer", "type": "Archer", "emoji": "🏹", "health": 40, "attack_range": 4, "attack": 7, "speed": 3, "special": {"damage_mult": 1.5, "move_cost_mult": 2}},
 }
 
 ITEM_DEFS = {
@@ -57,6 +57,8 @@ class Player:
         self.ws = ws
         self.char_id = char_id or "wizard"
         spec = CHARACTER_DEFS.get(self.char_id, CHARACTER_DEFS["wizard"])
+        # optional emoji used for map rendering and client previews
+        self.emoji = spec.get("emoji")
         self.char_type = spec["type"]
         self.max_health = spec["health"]
         self.health = spec["health"]
@@ -98,7 +100,8 @@ async def broadcast_all(msg: str, exclude: str = None):
 def render_map() -> str:
     grid = [["." for _ in range(WORLD_WIDTH)] for _ in range(WORLD_HEIGHT)]
     for p in players.values():
-        ch = p.name[0].upper() if p.name else "@"
+        # prefer character emoji when available, otherwise use first letter
+        ch = (p.emoji or (p.name[0].upper() if p.name else "@"))
         grid[p.y][p.x] = ch
     return "\n".join("".join(row) for row in grid)
 
@@ -107,7 +110,8 @@ async def broadcast_map():
     map_str = render_map()
     for p in players.values():
         try:
-            await p.ws.send_json({"type": "map", "map": map_str})
+            # include the recipient's own coordinates so the client can highlight their tile
+            await p.ws.send_json({"type": "map", "map": map_str, "you": {"x": p.x, "y": p.y}})
         except Exception:
             pass
 
