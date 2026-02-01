@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>ASCII Game Client</title>
+  <style>
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,'Helvetica Neue',Arial;margin:16px}
+    #map{background:#111;color:#0f0;padding:12px;font-family:monospace;white-space:pre;line-height:1}
+    #messages{margin-top:8px;height:240px;overflow:auto;background:#f6f6f6;padding:8px}
+    button{margin:4px}
+    .controls{margin-top:8px}
+    .panels{display:flex;gap:12px;margin-top:8px}
+    .panel{flex:1;min-width:0}
+    .chatBar{display:flex;gap:8px;margin-bottom:8px}
+    #keyHint{margin-top:8px;color:#666;font-size:13px}
+    /* lobby / character selection */
+    .lobbyInner{display:flex;flex-direction:column;align-items:center;gap:8px}
+    #characters{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+    .charCard{border:1px solid #ccc;padding:8px;border-radius:6px;width:160px;text-align:left;cursor:pointer;background:#fff}
+    .charCard.selected{border-color:#36f;background:#eef}
+    .charTitle{font-weight:700;margin-bottom:6px}
+    .charAttrs{font-size:13px;color:#333;line-height:1.4}
+    .charAttrs div{margin-bottom:6px}
+    .quitBtn{position:fixed;top:12px;right:12px;padding:6px 10px;border-radius:6px;border:1px solid #ccc;background:#fff;cursor:pointer;z-index:50}
+    .itemList{display:flex;flex-direction:column;gap:8px}
+    .itemCard{border:1px solid #ccc;padding:8px;border-radius:6px;cursor:pointer;background:#fff}
+    .itemCard:hover{background:#f7f7ff}
+    .itemTitle{font-weight:700}
+    .itemAttrs{font-size:12px;color:#444}
+    /* small card UI for actions / character */
+    .card{border:1px solid #ccc;padding:10px;border-radius:8px;background:#fff}
+    .cardTitle{font-weight:700;margin-bottom:8px}
+    .topCards{display:flex;gap:12px;margin-top:12px}
+    .actionsCard .actionButtons button{margin-right:8px}
+    .characterCard .statList{font-size:13px;color:#333;line-height:1.4}
+    .characterCard .statList div{margin-bottom:6px}
+  </style>
+</head>
+<body>
+  <h2>ASCII Game (Client)</h2>
+  <button id="quit" class="quitBtn">Quit</button>
+  <div id="lobby">
+    <div class="lobbyInner">
+      
+      <div id="characters" style="margin-top:12px"></div>
+
+      <div style="margin-top:12px;text-align:center">
+        <input id="name" placeholder="Your name" style="width:220px;padding:6px" />
+      </div>
+
+      <div style="margin-top:12px;text-align:center">
+        <button id="connect">Connect</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="game" style="display:none">
+    <pre id="map">(no map)</pre>
+    
+    <!-- top cards removed; character and actions moved into left column below -->
+
+    <div class="panels">
+      <div class="panel" id="panel1">
+        <div class="card characterCard" style="margin-bottom:12px">
+          <div class="cardTitle" id="charCardTitle">Character</div>
+          <div style="margin-bottom:8px">
+              <strong>HP</strong>: <progress id="hpBar" value="0" max="100" style="width:160px"></progress>
+              <span id="hpText">0/0</span>
+            </div>
+          <div class="charInfo">
+            <div><strong id="charName">-</strong></div>
+            <div class="statList">
+              <div>Attack: <span id="statAttack">-</span></div>
+              <div>Range: <span id="statRange">-</span></div>
+              <div>Speed: <span id="statSpeed">-</span></div>
+            </div>
+            
+          </div>
+        </div>
+
+        <div class="card actionsCard">
+          <div class="cardTitle">Actions</div>
+          <div class="actionButtons">
+            <button id="attack">Attack</button>
+            <button id="special">Special</button>
+            <button id="roll">Roll</button>
+            <button id="itemsToggle">Show Items</button>
+          </div>
+          <div style="margin-top:8px">
+            <strong>Moves</strong>: <span id="moves">0</span>
+          </div>
+          <div id="items" style="display:none; margin-top:8px"></div>
+        </div>
+      </div>
+
+      <div class="panel" id="panel2">
+        <div id="turnInfo">
+          <strong>Current:</strong> <span id="currentPlayer">-</span>
+          <div><strong>Upcoming:</strong>
+            <ol id="turnQueue" style="margin-top:4px"></ol>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel" id="panel3">
+        <div class="chatBar">
+          <input id="sayInput" placeholder="Say something" style="flex:1" />
+          <button id="sayBtn">Say</button>
+        </div>
+        <div id="messages"></div>
+      </div>
+    </div>
+    </div>
+
+    <script src="/static/main.js"></script>
+  </body>
+  </html>
+
