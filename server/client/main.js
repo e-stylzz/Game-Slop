@@ -30,6 +30,16 @@ let ws = null;
 let availableCharacters = {};
 let selectedCharacterId = null;
 
+// audio assets
+const attackAudio = new Audio('/static/audio/attack.mp3');
+attackAudio.preload = 'auto';
+attackAudio.addEventListener('error', () => { console.warn('Failed to load attack audio'); });
+
+// special attack audio
+const specialAudio = new Audio('/static/audio/explosion.mp3');
+specialAudio.preload = 'auto';
+specialAudio.addEventListener('error', () => { console.warn('Failed to load special audio'); });
+
 function setActionControl(el, emoji, label, disabled) {
   if (!el) return;
   // if element contains emoji/label children (card), update them
@@ -368,6 +378,7 @@ attackBtn.addEventListener('click', () => {
   if (!ws || ws.readyState !== WebSocket.OPEN) return addMsg('Not connected');
   if (attackBtn.classList && attackBtn.classList.contains && attackBtn.classList.contains('disabled')) return addMsg('Not enough moves');
   if (attackBtn.getAttribute && attackBtn.getAttribute('aria-disabled') === 'true') return addMsg('Not enough moves');
+  try { attackAudio.currentTime = 0; attackAudio.play().catch(() => {}); } catch (e) {}
   ws.send('attack');
 });
 
@@ -375,6 +386,7 @@ specialBtn.addEventListener('click', () => {
   if (!ws || ws.readyState !== WebSocket.OPEN) return addMsg('Not connected');
   if (specialBtn.classList && specialBtn.classList.contains && specialBtn.classList.contains('disabled')) return addMsg('Not enough moves');
   if (specialBtn.getAttribute && specialBtn.getAttribute('aria-disabled') === 'true') return addMsg('Not enough moves');
+  try { specialAudio.currentTime = 0; specialAudio.play().catch(() => {}); } catch (e) {}
   ws.send('attack special');
 });
 
@@ -408,6 +420,7 @@ document.addEventListener('keydown', (e) => {
     const mp = parseInt(movesEl ? movesEl.textContent : '0', 10) || 0;
     if (mp < ATTACK_COST) return addMsg('Not enough moves');
     e.preventDefault();
+    try { attackAudio.currentTime = 0; attackAudio.play().catch(() => {}); } catch (e) {}
     ws.send('attack');
   }
 });
@@ -420,6 +433,7 @@ document.addEventListener('keydown', (e) => {
     const mp = parseInt(movesEl ? movesEl.textContent : '0', 10) || 0;
     if (mp < SPECIAL_COST) return addMsg('Not enough moves');
     e.preventDefault();
+    try { specialAudio.currentTime = 0; specialAudio.play().catch(() => {}); } catch (e) {}
     ws.send('attack special');
   }
 });

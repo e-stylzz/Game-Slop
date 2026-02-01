@@ -31,8 +31,8 @@ async def root_index():
     if index_file.exists():
         return FileResponse(str(index_file))
     return {"msg": "No client UI found"}
-WORLD_WIDTH = 100
-WORLD_HEIGHT = 30
+WORLD_WIDTH = 125
+WORLD_HEIGHT = 20
 
 CHARACTER_DEFS = {
     "wizard": {"id": "wizard", "type": "Wizard", "emoji": "🧙", "health": 50, "attack_range": 3, "attack": 12, "speed": 2, "special": {"name": "Thunder Clap", "emoji": "⚡", "damage_mult": 2.0, "move_cost_mult": 2}},
