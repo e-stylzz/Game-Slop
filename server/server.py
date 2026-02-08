@@ -40,7 +40,7 @@ CHARACTER_DEFS = {
     "barbarian": {"id": "barbarian", "type": "Barbarian", "emoji": "🪓", "health": 100, "attack_range": 1, "attack": 18, "speed": 1, "special": {"name": "Berserker Slam", "emoji": "💥", "damage_mult": 2.0, "move_cost_mult": 2}},
     "snowbeast": {"id": "snowbeast", "type": "Snow Beast", "emoji": "🐺", "health": 120, "attack_range": 2, "attack": 15, "speed": 1, "special": {"name": "Frost Bite", "emoji": "❄️", "damage_mult": 1.8, "move_cost_mult": 2}},
     "archer": {"id": "archer", "type": "Archer", "emoji": "🏹", "health": 40, "attack_range": 4, "attack": 7, "speed": 3, "special": {"name": "Flaming Arrows", "emoji": "🏹", "damage_mult": 1.5, "move_cost_mult": 2}},
-    "queen": {"id": "queen", "type": "Queen", "emoji": "👑", "health": 80, "attack_range": 2, "attack": 14, "speed": 2, "special": {"name": "Royal Decree", "emoji": "🔱", "damage_mult": 2.0, "move_cost_mult": 2}},
+    "queen": {"id": "queen", "type": "Queen", "emoji": "👑", "health": 80, "attack_range": 2, "attack": 14, "speed": 2, "special": {"name": "Queens Gambit", "emoji": "🔱", "damage_mult": 2.0, "move_cost_mult": 2}},
 }
 
 ITEM_DEFS = {
