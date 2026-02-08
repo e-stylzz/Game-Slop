@@ -1,2 +1,73 @@
+# Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+pip-wheel-metadata/
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+server/.venv/
+server/venv/
+
+# Env files
+.env
+.env.*
+
+# macOS
+.DS_Store
+
+# IDEs and editors
+.idea/
+.vscode/
+*.sublime-workspace
+*.sublime-project
+
+# Logs and databases
+*.log
+*.sqlite3
+*.db
+
+# Test / coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Type check / caches
+.mypy_cache/
+__pypackages__/
+
+# Editor temporary files
+*~
+*.swp
+*.swo
+
+# Static / build outputs (frontend)
+server/client/build/
+server/client/dist/
+server/client/.cache/
+
+# Node (if ever used)
+node_modules/
+npm-debug.log*
+yarn-error.log*
+
+# Docker
+.envrc
+.dockerignore
+
+# Misc
+coverage.xml
+coverage/
 notes.txt
 README.md
