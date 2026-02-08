@@ -70,4 +70,5 @@ yarn-error.log*
 coverage.xml
 coverage/
 notes.txt
-README.md
+
+.DS_Store
